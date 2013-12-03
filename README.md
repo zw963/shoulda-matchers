@@ -85,6 +85,16 @@ class UserProfile < ActiveRecord::Base
   validates_format_of :state,
     with: /^(open|closed)$/,
     message: 'State must be open or closed'
+
+  validate :sports_team_must_be_valid
+
+  private
+
+  def sports_team_must_be_valid
+    if sports_team !~ /^(Broncos|Titans)$/i
+      self.errors.add :chosen_sports_team, "Must be either a Broncos or Titans fan"
+    end
+  end
 end
 
 # RSpec
@@ -109,9 +119,11 @@ describe UserProfile do
   end
 
   it do
-    should_not allow_value(nil).
-      for(:state).
-      with_message(/both city and state must be set/, against: :base)
+    should_not allow_value('Raiders').
+      for(:sports_team).
+      with_message('Must be either a Broncos or Titans fan',
+        against: :chosen_sports_team
+      )
   end
 end
 
@@ -127,6 +139,12 @@ class UserProfileTest < ActiveSupport::TestCase
   should allow_value('open', 'closed').
     for(:state).
     with_message('State must be open or closed')
+
+  should_not allow_value('Raiders').
+    for(:sports_team).
+    with_message('Must be either a Broncos or Titans fan',
+      against: :chosen_sports_team
+    )
 end
 ```
 
