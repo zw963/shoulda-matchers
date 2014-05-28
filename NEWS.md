@@ -1,5 +1,9 @@
 # HEAD
 
+### Bug fixes
+
+* Fix `set_session` as it did not work when used with `.to(nil)`.
+
 ### Improvements
 
 * `have_and_belongs_to_many` now checks to make sure that the join table
