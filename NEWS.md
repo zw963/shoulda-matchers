@@ -27,11 +27,18 @@
 * Tweak `allow_value` failure message so that it reads a bit nicer when listing
   existing errors.
 
+### Features
+
+* Add support for `validate_uniqueness_of(:foo).allow_blank` to complement
+  [`validates_uniqueness_of :foo, allow_blank: true`][vuo] ([#543])
+
 [#591]: https://github.com/thoughtbot/shoulda-matchers/pull/591
 [#592]: https://github.com/thoughtbot/shoulda-matchers/pull/592
 [#588]: https://github.com/thoughtbot/shoulda-matchers/pull/588
 [#584]: https://github.com/thoughtbot/shoulda-matchers/pull/584
 [#593]: https://github.com/thoughtbot/shoulda-matchers/pull/593
+[vuo]: http://api.rubyonrails.org/classes/ActiveRecord/Validations/ClassMethods.html#method-i-validates_uniqueness_of
+[#543]: https://github.com/thoughtbot/shoulda-matchers/pull/543
 
 # 2.7.0
 
@@ -101,11 +108,14 @@
   from `validate_uniqueness_of`, your best bet continues to be creating a record
   manually and calling `validate_uniqueness_of` on that instead.
 
+<<<<<<< HEAD
 ### Other changes
 
 * The majority of warnings that the gem produced have been removed. The gem
   still produces warnings under Ruby 1.9.3; we will address this in a future
   release.
+=======
+>>>>>>> fcbc16e... Add `validate_uniqueness_of_(:foo).allow_blank`
 
 # 2.6.1
 

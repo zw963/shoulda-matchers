@@ -468,6 +468,74 @@ describe Shoulda::Matchers::ActiveModel::ValidateUniquenessOfMatcher do
     end
   end
 
+  context 'qualified with allow_blank' do
+    context 'when the validation allows blank' do
+      context 'when there is an existing entry with a blank' do
+        it 'matches' do
+          model = define_model_with_allow_blank
+          model.create!(attribute => '')
+          expect(model.new).to matcher.allow_blank
+        end
+      end
+
+      context 'when there is not an existing entry with a blank' do
+        it 'creates one' do
+          model = define_model_with_allow_blank
+          matcher.allow_blank.matches?(model.new)
+          model.all.any? { |instance| instance.attr.blank? }
+        end
+
+        it 'matches' do
+          model = define_model_with_allow_blank
+          expect(model.new).to matcher.allow_blank
+        end
+      end
+
+      def define_model_with_allow_blank
+        _attribute = attribute
+
+        define_model(:example, _attribute => :string) do
+          attr_accessible _attribute
+          validates_uniqueness_of _attribute, allow_blank: true
+        end
+      end
+
+      def attribute
+        :attr
+      end
+    end
+
+    context 'when the validation does not allow a blank' do
+      context 'when there is an existing entry with a blank' do
+        it 'does not match' do
+          model = define_model_without_allow_blank
+          model.create!(attribute => '')
+          expect(model.new).not_to matcher.allow_blank
+        end
+      end
+
+      context 'when there is not an existing entry with a blank' do
+        it 'does not match' do
+          model = define_model_without_allow_blank
+          expect(model.new).not_to matcher.allow_blank
+        end
+      end
+
+      def define_model_without_allow_blank
+        _attribute = attribute
+
+        define_model(:example, _attribute => :string) do
+          attr_accessible _attribute
+          validates_uniqueness_of _attribute
+        end
+      end
+
+      def attribute
+        :attr
+      end
+    end
+  end
+
   def case_sensitive_validation_with_existing_value(attr_type)
     model = define_model(:example, attr: attr_type) do
       attr_accessible :attr

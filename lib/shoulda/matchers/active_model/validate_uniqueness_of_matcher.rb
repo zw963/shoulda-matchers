@@ -171,12 +171,36 @@ module Shoulda
       #
       # @return [ValidateUniquenessOfMatcher]
       #
+      # ##### allow_blank
+      #
+      # Use `allow_blank` to assert that the attribute allows the empty string.
+      #
+      #     class Post < ActiveRecord::Base
+      #       validates_uniqueness_of :author_id, allow_blank: true
+      #     end
+      #
+      #     # RSpec
+      #     describe Post do
+      #       it { should validate_uniqueness_of(:author_id).allow_blank }
+      #     end
+      #
+      #     # Test::Unit
+      #     class PostTest < ActiveSupport::TestCase
+      #       should validate_uniqueness_of(:author_id).allow_blank
+      #     end
+      #
+      # @return [ValidateUniquenessOfMatcher]
       def validate_uniqueness_of(attr)
         ValidateUniquenessOfMatcher.new(attr)
       end
 
       # @private
       class ValidateUniquenessOfMatcher < ValidationMatcher
+        DEFAULT_VALUES = Hash.new('x').update(
+          nil: nil,
+          blank: ''
+        )
+
         include Helpers
 
         def initialize(attribute)
@@ -204,6 +228,11 @@ module Shoulda
           self
         end
 
+        def allow_blank
+          @options[:allow_blank] = true
+          self
+        end
+
         def description
           result = "require "
           result << "case sensitive " unless @options[:case_insensitive]
@@ -218,9 +247,10 @@ module Shoulda
           @expected_message ||= :taken
 
           set_scoped_attributes &&
-            validate_everything_except_duplicate_nils? &&
+            validate_everything_except_duplicate_nils_or_blanks? &&
             validate_after_scope_change? &&
-            allows_nil?
+            allows_nil? &&
+            allows_blank?
         ensure
           Uniqueness::TestModels.remove_all
         end
@@ -236,6 +266,15 @@ module Shoulda
           end
         end
 
+        def allows_blank?
+          if @options[:allow_blank]
+            ensure_blank_record_in_database
+            allows_value_of('', @expected_message)
+          else
+            true
+          end
+        end
+
         def existing_record
           @existing_record ||= first_instance
         end
@@ -246,7 +285,13 @@ module Shoulda
 
         def ensure_nil_record_in_database
           unless existing_record_is_nil?
-            create_record_in_database(nil_value: true)
+            create_record_in_database(value: :nil)
+          end
+        end
+
+        def ensure_blank_record_in_database
+          unless existing_record_is_blank?
+            create_record_in_database(value: :blank)
           end
         end
 
@@ -254,15 +299,13 @@ module Shoulda
           @existing_record.present? && existing_value.nil?
         end
 
-        def create_record_in_database(options = {})
-          if options[:nil_value]
-            value = nil
-          else
-            value = 'a'
-          end
+        def existing_record_is_blank?
+          @existing_record.present? && existing_value.strip == ''
+        end
 
+        def create_record_in_database(options = {})
           @original_subject.tap do |instance|
-            instance.__send__("#{@attribute}=", value)
+            instance.__send__("#{@attribute}=", default_value(options))
             ensure_secure_password_set(instance)
             instance.save(validate: false)
             @created_record = instance
@@ -276,8 +319,13 @@ module Shoulda
           end
         end
 
+        def default_value(options = {})
+          DEFAULT_VALUES[options[:value]]
+        end
+
         def has_secure_password?
-          @subject.class.ancestors.map(&:to_s).include?('ActiveModel::SecurePassword::InstanceMethodsOnActivation')
+          @subject.class.ancestors.map(&:to_s).
+            include?('ActiveModel::SecurePassword::InstanceMethodsOnActivation')
         end
 
         def set_scoped_attributes
@@ -297,15 +345,20 @@ module Shoulda
           end
         end
 
-        def validate_everything_except_duplicate_nils?
-          if @options[:allow_nil] && existing_value.nil?
-            create_record_without_nil
+        def validate_everything_except_duplicate_nils_or_blanks?
+          if need_to_recreate_existing_record?
+            recreate_existing_record
           end
 
           disallows_value_of(existing_value, @expected_message)
         end
 
-        def create_record_without_nil
+        def need_to_recreate_existing_record?
+          (@options[:allow_nil] && existing_value.nil?) ||
+            (@options[:allow_blank] && existing_value.blank?)
+        end
+
+        def recreate_existing_record
           @existing_record = create_record_in_database
         end
 
