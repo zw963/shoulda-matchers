@@ -409,7 +409,7 @@ EOT
             end
           end
 
-          !allows_value_of(*values_outside_of_array)
+          !allows_value_of(*values_outside_of_array, @low_message)
         end
 
         def values_outside_of_array

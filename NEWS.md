@@ -17,6 +17,9 @@
   when `foreign_key` and/or `association_foreign_key` was specified on the
   association as a symbol instead of a string. ([#584])
 
+* Fix `validate_inclusion_of` used with `with_message` so that it fails if given
+  a message that does not match the message on the validation. ([#592])
+
 [#591]: https://github.com/thoughtbot/shoulda-matchers/pull/591
 [#592]: https://github.com/thoughtbot/shoulda-matchers/pull/592
 [#588]: https://github.com/thoughtbot/shoulda-matchers/pull/588
