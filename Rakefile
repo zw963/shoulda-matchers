@@ -42,14 +42,15 @@ task :appraise do
 end
 
 GH_PAGES_DIR = '.gh-pages'
+DOCS_DIR = "#{GH_PAGES_DIR}/docs"
 
 namespace :docs do
   file GH_PAGES_DIR do
     sh "git clone git@github.com:thoughtbot/shoulda-matchers.git #{GH_PAGES_DIR} --branch gh-pages"
   end
 
-  task :setup => GH_PAGES_DIR do
-    within_gh_pages do
+  task :setup => DOCS_DIR do
+    within_gh_pages_dir do
       sh 'git fetch origin'
       sh 'git reset --hard origin/gh-pages'
     end
@@ -79,7 +80,7 @@ namespace :docs do
   end
 
   def rewrite_index_to_inject_version(ref, version)
-    within_gh_pages do
+    within_docs_dir do
       filename = "#{ref}/index.html"
       content = File.read(filename)
       content.sub!(%r{<h1>shoulda-matchers.+</h1>}, "<h1>shoulda-matchers (#{version})</h1>")
@@ -95,7 +96,7 @@ namespace :docs do
 
     rewrite_index_to_inject_version(ref, version)
 
-    within_gh_pages do
+    within_docs_dir do
       sh "git add #{ref}"
     end
 
@@ -107,7 +108,7 @@ namespace :docs do
   def publish_docs(version, options = {})
     message = build_commit_message(version)
 
-    within_gh_pages do
+    within_gh_pages_dir do
       sh 'git clean -f'
       sh "git commit -m '#{message}'"
       sh 'git push'
@@ -120,7 +121,7 @@ namespace :docs do
 
     erb = ERB.new(File.read('doc_config/gh-pages/index.html.erb'))
 
-    within_gh_pages do
+    within_docs_dir do
       File.open('index.html', 'w') { |f| f.write(erb.result(binding)) }
       sh 'git add index.html'
     end
@@ -138,8 +139,12 @@ namespace :docs do
     "Regenerated docs for version #{version}"
   end
 
-  def within_gh_pages(&block)
+  def within_gh_pages_dir(&block)
     Dir.chdir(GH_PAGES_DIR, &block)
+  end
+
+  def within_docs_dir(&block)
+    Dir.chdir(DOCS_DIR, &block)
   end
 end
 
