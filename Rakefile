@@ -47,15 +47,17 @@ DOCS_DIR = "#{GH_PAGES_DIR}/docs"
 GITHUB_USERNAME = 'mcmire'
 
 namespace :docs do
-  file GH_PAGES_DIR do
+  directory GH_PAGES_DIR do
     sh "git clone git@github.com:#{GITHUB_USERNAME}/shoulda-matchers.git #{GH_PAGES_DIR} --branch gh-pages"
   end
 
-  task :setup => DOCS_DIR do
+  task :setup => GH_PAGES_DIR do
     within_gh_pages_dir do
       sh 'git fetch origin'
       sh 'git reset --hard origin/gh-pages'
     end
+
+    FileUtils.mkdir_p(DOCS_DIR)
   end
 
   desc 'Generate docs for a particular version'
