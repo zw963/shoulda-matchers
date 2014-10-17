@@ -43,10 +43,12 @@ end
 
 GH_PAGES_DIR = '.gh-pages'
 DOCS_DIR = "#{GH_PAGES_DIR}/docs"
+# GH_USERNAME = 'thoughtbot'
+GITHUB_USERNAME = 'mcmire'
 
 namespace :docs do
   file GH_PAGES_DIR do
-    sh "git clone git@github.com:thoughtbot/shoulda-matchers.git #{GH_PAGES_DIR} --branch gh-pages"
+    sh "git clone git@github.com:#{GITHUB_USERNAME}/shoulda-matchers.git #{GH_PAGES_DIR} --branch gh-pages"
   end
 
   task :setup => DOCS_DIR do
