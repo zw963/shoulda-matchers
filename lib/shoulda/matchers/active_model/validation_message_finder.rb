@@ -42,11 +42,7 @@ module Shoulda
         private
 
         def messages_for_attribute
-          if errors.respond_to?(:[])
-            errors[@attribute]
-          else
-            errors.on(@attribute)
-          end
+          errors[@attribute]
         end
 
         def errors
