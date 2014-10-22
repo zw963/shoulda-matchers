@@ -215,12 +215,12 @@ module Shoulda
 
         def matches?(instance)
           self.instance = instance
+          values_to_match.all? { |value| value_matches?(value) }
+        end
 
-          values_to_match.none? do |value|
-            self.value = value
-            set_value(value)
-            errors_match?
-          end
+        def does_not_match?(instance)
+          self.instance = instance
+          values_to_match.all? { |value| !value_matches?(value) }
         end
 
         def failure_message
@@ -242,6 +242,12 @@ module Shoulda
         attr_accessor :values_to_match, :message_finder_factory,
           :instance, :attribute_to_set, :attribute_to_check_message_against,
           :context, :value, :matched_error, :after_setting_value_callback
+
+        def value_matches?(value)
+          self.value = value
+          set_value(value)
+          !errors_match?
+        end
 
         def set_value(value)
           instance.__send__("#{attribute_to_set}=", value)
