@@ -29,3 +29,8 @@ module Shoulda
     end
   end
 end
+
+ActiveSupport::TestCase.class_eval do
+  include Shoulda::Matchers::ActiveModel
+  extend Shoulda::Matchers::ActiveModel
+end

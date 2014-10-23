@@ -8,7 +8,8 @@ ENV['BUNDLE_GEMFILE'] ||= app.gemfile_path
 ENV['RAILS_ENV'] = 'test'
 
 require 'bourne'
-require 'shoulda-matchers'
+require 'shoulda/matchers/rspec'
+require 'shoulda/matchers/rails'
 require 'rspec/rails'
 
 PROJECT_ROOT = File.expand_path('../..', __FILE__)
