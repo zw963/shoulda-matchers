@@ -8,8 +8,7 @@ ENV['BUNDLE_GEMFILE'] ||= app.gemfile_path
 ENV['RAILS_ENV'] = 'test'
 
 require 'bourne'
-require 'shoulda/matchers/rspec'
-require 'shoulda/matchers/rails'
+require 'shoulda/matchers'
 require 'rspec/rails'
 
 PROJECT_ROOT = File.expand_path('../..', __FILE__)
@@ -26,6 +25,13 @@ RSpec.configure do |config|
 
   if config.respond_to?(:infer_spec_type_from_file_location!)
     config.infer_spec_type_from_file_location!
+  end
+end
+
+Shoulda::Matchers.configure do |config|
+  config.plug_into do |plugs|
+    plugs.test_framework = :rspec
+    plugs.library = :rails
   end
 end
 

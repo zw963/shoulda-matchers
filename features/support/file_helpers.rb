@@ -1,4 +1,14 @@
+require_relative 'configures_project_with_shoulda_matchers'
+
 module RubyHelpers
+  def install_gems
+    run_command('bundle install --local')
+  end
+
+  def run_command(command)
+    run_simple(unescape(command), false)
+  end
+
   def append_to(path, contents)
     in_current_dir do
       File.open(path, 'a') do |file|
@@ -30,6 +40,10 @@ module RubyHelpers
       contents.insert(index, line_to_insert)
       File.open(file_path, 'w') { |f| f.write(contents) }
     end
+  end
+
+  def configure_project_with_shoulda_matchers(yaml, options = {})
+    Features::ConfiguresProjectWithShouldaMatchers.call(self, yaml, options)
   end
 end
 

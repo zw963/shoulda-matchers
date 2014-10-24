@@ -4,7 +4,6 @@ When 'I generate a new Ruby application' do
     And I cd to "#{APP_NAME}"
     And I run `bundle init`
     And I set the "BUNDLE_GEMFILE" environment variable to "Gemfile"
-    When I configure the application to use "shoulda-matchers" from this project
   }
 end
 
@@ -64,6 +63,14 @@ When /^I configure the application to use "([^\"]+)" from this project, disablin
   steps %{And I install gems}
 end
 
+When 'I add shoulda-matchers to the project with:' do |yaml|
+  configure_project_with_shoulda_matchers(yaml, auto_require: true)
+end
+
+When 'I add shoulda-matchers to the project disabling auto-require with:' do |yaml|
+  configure_project_with_shoulda_matchers(yaml, auto_require: false)
+end
+
 When 'I configure the application to use shoulda-context' do
   append_to_gemfile %q(gem 'shoulda-context', '~> 1.2.0')
   append_to_gemfile %q(gem 'pry')
@@ -81,7 +88,7 @@ When /^I comment out the gem "([^"]*)" from the Gemfile$/ do |gemname|
 end
 
 When /^I install gems$/ do
-  steps %{When I run `bundle install --local`}
+  install_gems
 end
 
 Then /^the output should indicate that (\d+) tests? (?:was|were) run/ do |number|

@@ -30,9 +30,12 @@ Feature: integrate with Rails
       """
     When I configure a wildcard route
 
-  Scenario: generate a rails application and use matchers in Test::Unit
+  Scenario: A Rails application using the default test framework
     When I configure the application to use shoulda-context
-    And I configure the application to use "shoulda-matchers" from this project
+    And I add shoulda-matchers to the project with:
+      """
+      library: rails
+      """
     And I write to "test/unit/user_test.rb" with:
       """
       require 'test_helper'
@@ -61,8 +64,13 @@ Feature: integrate with Rails
 
   Scenario: generate a rails application and use matchers in Rspec
     When I configure the application to use rspec-rails
-    And I configure the application to use "shoulda-matchers" from this project
     And I run the rspec generator
+    And I add shoulda-matchers to the project with:
+      """
+      test_frameworks:
+        - rspec
+      library: rails
+      """
     And I write to "spec/models/user_spec.rb" with:
       """
       require 'spec_helper'
@@ -92,13 +100,17 @@ Feature: integrate with Rails
     And the output should contain "should respond with 200"
 
   @spring
-  Scenario: A Rails application that uses RSpec, requires shoulda-matchers manually, and uses Spring to run tests
+  Scenario: A Rails application that uses RSpec and uses Spring to run tests
     When I configure the application to use Spring
     When I configure the application to use "spring-commands-rspec"
     When I configure the application to use rspec-rails
-    And I configure the application to use "shoulda-matchers" from this project, disabling auto-require
     And I run the rspec generator
-    And I require shoulda-matchers following rspec-rails
+    And I add shoulda-matchers to the project disabling auto-require with:
+      """
+      test_frameworks:
+        - rspec
+      library: rails
+      """
     And I write to "spec/models/user_spec.rb" with:
       """
       require 'spec_helper'
@@ -131,8 +143,13 @@ Feature: integrate with Rails
 
   Scenario: generate a Rails application that mixes Rspec and Test::Unit
     When I configure the application to use rspec-rails in test and development
-    And I configure the application to use "shoulda-matchers" from this project in test and development
     And I run the rspec generator
+    And I add shoulda-matchers to the project with:
+      """
+      test_frameworks:
+        - rspec
+      library: rails
+      """
     And I write to "spec/models/user_spec.rb" with:
       """
       require 'spec_helper'

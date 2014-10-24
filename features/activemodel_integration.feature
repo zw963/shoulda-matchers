@@ -1,8 +1,13 @@
 Feature: integration with ActiveModel
-
   Scenario: create a new project using matchers
     When I generate a new ActiveModel application
     And I configure the application to use "shoulda-matchers" from this project
+    And I add shoulda-matchers to the project with:
+      """
+      test_frameworks:
+        - rspec
+      library: active_model
+      """
     And I write to "load_dependencies.rb" with:
       """
       require 'active_model'

@@ -54,12 +54,6 @@ When 'I configure the application to use rspec-rails in test and development' do
   steps %{And I install gems}
 end
 
-When 'I require shoulda-matchers following rspec-rails' do
-  insert_line_after test_helper_path,
-    "require 'rspec/rails'",
-    "require 'shoulda/matchers'"
-end
-
 When /^I set the "([^"]*)" environment variable to "([^"]*)"$/ do |key, value|
   ENV[key] = value
 end

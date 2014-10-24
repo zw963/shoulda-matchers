@@ -4,6 +4,11 @@ Feature: Independent matchers
 
   Scenario: A Ruby application that uses Minitest and the delegate_method matcher
     When I add Minitest to the project
+    And I add shoulda-matchers to the project with:
+      """
+      test_frameworks:
+        - minitest
+      """
     And I write to "lib/post_office.rb" with:
       """
       class PostOffice

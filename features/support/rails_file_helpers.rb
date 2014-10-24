@@ -25,6 +25,14 @@ module RailsHelpers
     end
   end
 
+  def test_helper_path
+    if rspec_rails_gte_3?
+      'spec/rails_helper.rb'
+    else
+      'spec/spec_helper.rb'
+    end
+  end
+
   def rspec_rails_version
     Bundler.definition.specs['rspec-rails'][0].version
   end
@@ -32,14 +40,6 @@ module RailsHelpers
   def rspec_rails_gte_3?
     if rspec_rails_version
       Gem::Requirement.new('>= 3').satisfied_by?(rspec_rails_version)
-    end
-  end
-
-  def test_helper_path
-    if rspec_rails_gte_3?
-      'spec/rails_helper.rb'
-    else
-      'spec/spec_helper.rb'
     end
   end
 end

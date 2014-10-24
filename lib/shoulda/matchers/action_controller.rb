@@ -17,12 +17,3 @@ module Shoulda
     end
   end
 end
-
-ActionController::TestCase.class_eval do
-  include Shoulda::Matchers::ActionController
-  extend Shoulda::Matchers::ActionController
-
-  def subject
-    @controller
-  end
-end

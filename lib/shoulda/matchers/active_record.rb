@@ -23,8 +23,3 @@ module Shoulda
     end
   end
 end
-
-ActiveSupport::TestCase.class_eval do
-  include Shoulda::Matchers::ActiveRecord
-  extend Shoulda::Matchers::ActiveRecord
-end
