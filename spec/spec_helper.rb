@@ -30,6 +30,7 @@ PROJECT_ROOT = File.expand_path('../..', __FILE__)
 $LOAD_PATH << File.join(PROJECT_ROOT, 'lib')
 
 Dir[ File.join(PROJECT_ROOT, 'spec/support/**/*.rb') ].each { |file| require file }
+
 RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
@@ -37,6 +38,7 @@ RSpec.configure do |config|
 
   config.mock_with :mocha
   config.include Shoulda::Matchers::ActionController, type: :controller
+  config.include Acceptance::Helpers, type: :acceptance
 
   if config.respond_to?(:infer_spec_type_from_file_location!)
     config.infer_spec_type_from_file_location!

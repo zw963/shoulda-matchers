@@ -1,6 +1,6 @@
 require 'fileutils'
 
-class TestApplication
+class TestRailsApplication
   ROOT_DIR = File.expand_path('../../../tmp/aruba/testapp', __FILE__)
 
   def create
