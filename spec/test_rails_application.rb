@@ -3,10 +3,15 @@ require 'fileutils'
 class TestRailsApplication
   ROOT_DIR = File.expand_path('../../../tmp/aruba/testapp', __FILE__)
 
+  def initialize
+    @fs = TestFilesystem.new
+    @shell = TestShell.new
+  end
+
   def create
-    clean
+    fs.clean
     generate
-    within_app { install_gems }
+    fs.within_project { install_gems }
   end
 
   def load
@@ -15,25 +20,25 @@ class TestRailsApplication
   end
 
   def gemfile_path
-    File.join(ROOT_DIR, 'Gemfile')
+    fs.find('Gemfile')
   end
 
   def environment_file_path
-    File.join(ROOT_DIR, 'config/environment')
+    fs.find_in_project('config/environment')
   end
 
-  def temp_views_dir_path
-    File.join(ROOT_DIR, 'tmp/views')
+  def temp_views_directory
+    fs.find_in_project('tmp/views')
   end
 
   def create_temp_view(path, contents)
     full_path = temp_view_path_for(path)
-    FileUtils.mkdir_p(File.dirname(full_path))
-    File.open(full_path, 'w') { |file| file.write(contents) }
+    full_path.mkpath
+    full_path.write(contents)
   end
 
   def delete_temp_views
-    FileUtils.rm_rf(temp_views_dir_path)
+    temp_views_directory.rmtree
   end
 
   def draw_routes(&block)
@@ -41,18 +46,18 @@ class TestRailsApplication
     Rails.application.routes
   end
 
+  protected
+
+  attr_reader :fs
+
   private
 
-  def migrations_dir_path
-    File.join(ROOT_DIR, 'db/migrate')
+  def migrations_directory
+    project.find_in_project('db/migrate')
   end
 
   def temp_view_path_for(path)
-    File.join(temp_views_dir_path, path)
-  end
-
-  def clean
-    FileUtils.rm_rf(ROOT_DIR)
+    temp_views_directory.join(path)
   end
 
   def generate
@@ -61,25 +66,23 @@ class TestRailsApplication
   end
 
   def rails_new
-    `rails new #{ROOT_DIR} --skip-bundle`
+    shell.run_command! "rails new #{fs.project_directory} --skip-bundle'"
   end
 
   def fix_available_locales_warning
     # See here for more on this:
     # http://stackoverflow.com/questions/20361428/rails-i18n-validation-deprecation-warning
 
-    filename = File.join(ROOT_DIR, 'config/application.rb')
+    file = find_in_project('config/application.rb')
 
     lines = File.read(filename).split("\n")
     lines.insert(-3, <<EOT)
 if I18n.respond_to?(:enforce_available_locales=)
-  I18n.enforce_available_locales = false
+I18n.enforce_available_locales = false
 end
 EOT
 
-    File.open(filename, 'w') do |f|
-      f.write(lines.join("\n"))
-    end
+    file.write(lines.join("\n"))
   end
 
   def load_environment
@@ -88,33 +91,13 @@ EOT
 
   def run_migrations
     ActiveRecord::Migration.verbose = false
-    ActiveRecord::Migrator.migrate(migrations_dir_path)
+    ActiveRecord::Migrator.migrate(migrations_directory)
   end
 
+  # TODO
   def install_gems
-    retrying('bundle install --local') do |command|
-      Bundler.with_clean_env { `#{command}` }
-    end
-  end
-
-  def within_app(&block)
-    Dir.chdir(ROOT_DIR, &block)
-  end
-
-  def retrying(command, &runner)
-    runner ||= -> { `#{command}` }
-
-    retry_count = 0
-    loop do
-      output = runner.call("#{command} 2>&1")
-      if $? == 0
-        break
-      else
-        retry_count += 1
-        if retry_count == 3
-          raise "Command '#{command}' failed:\n#{output}"
-        end
-      end
+    shell.retrying_command('bundle install --local') do |runner|
+      runner.around { |run_command| Bundler.with_clean_env(&run_command) }
     end
   end
 end
