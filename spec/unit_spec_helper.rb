@@ -29,20 +29,33 @@ require 'rspec/rails'
 PROJECT_ROOT = File.expand_path('../..', __FILE__)
 $LOAD_PATH << File.join(PROJECT_ROOT, 'lib')
 
-Dir[ File.join(PROJECT_ROOT, 'spec/support/**/*.rb') ].each { |file| require file }
+Dir[ File.join(File.expand_path('../support/unit/**/*.rb', __FILE__)) ].each do |file|
+  require file
+end
 
 RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
 
-  config.mock_with :mocha
-  config.include Shoulda::Matchers::ActionController, type: :controller
-  config.include Acceptance::Helpers, type: :acceptance
-
   if config.respond_to?(:infer_spec_type_from_file_location!)
     config.infer_spec_type_from_file_location!
   end
+
+  config.mock_with :mocha
+  config.include Shoulda::Matchers::ActionController, type: :controller
+
+  UnitTests::ActiveModelHelpers.configure_example_group(config)
+  UnitTests::ActiveModelVersions.configure_example_group(config)
+  UnitTests::ActiveResourceBuilder.configure_example_group(config)
+  UnitTests::ClassBuilder.configure_example_group(config)
+  UnitTests::ControllerBuilder.configure_example_group(config)
+  UnitTests::I18nFaker.configure_example_group(config)
+  UnitTests::MailerBuilder.configure_example_group(config)
+  UnitTests::ModelBuilder.configure_example_group(config)
+  UnitTests::RailsVersions.configure_example_group(config)
+
+  config.include UnitTests::Matchers
 end
 
 $VERBOSE = true
